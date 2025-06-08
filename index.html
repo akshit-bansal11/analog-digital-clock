@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Analog + Digital Clock</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .circle {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+        }
+        .circle i {
+            position: absolute;
+            width: 4px;
+            height: 50%;
+            background: var(--clr);
+            transform-origin: bottom;
+            transform: scaleY(0.5);
+            opacity: 0.75;
+        }
+        .circle::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--clr);
+            box-shadow: 0 0 10px var(--clr), 0 0 30px var(--clr);
+        }
+        .clock span {
+            position: absolute;
+            inset: 5px;
+            color: white;
+            text-align: center;
+            transform: rotate(calc(30deg * var(--i)));
+        }
+        .clock span b {
+            display: inline-block;
+            transform: rotate(calc(-30deg * var(--i)));
+            font-size: 1.25rem;
+            opacity: 0.3;
+        }
+        .time div:nth-child(1)::after,
+        .time div:nth-child(2)::after {
+            content: ":";
+            position: absolute;
+            right: -4px;
+            color: white;
+            animation: blink 1s steps(1) infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen" style="background-color: #272727;">
+    <div class="flex flex-col items-center p-6 rounded-[50px] bg-[#2f363e] shadow-xl">
+        <div class="clock relative w-[300px] h-[300px] rounded-full flex items-center justify-center mb-8 ">
+            <div id="sc" class="circle w-[220px] h-[220px]" style="--clr:#7cdf7c"><i></i></div>
+            <div id="min" class="circle w-[180px] h-[180px] z-10" style="--clr:yellow"><i></i></div>
+            <div id="hr" class="circle w-[140px] h-[140px] z-20" style="--clr:pink"><i></i></div>
+            <div id="nums"></div>
+        </div>
+        <div class="time flex text-xl font-semibold text-white gap-2 relative border-2 border-gray-300 rounded-md p-2">
+            <div id="hour" class="relative w-[40px] text-center text-pink-400">00</div>
+            <div id="minute" class="relative w-[40px] text-center text-yellow-300">00</div>
+            <div id="second" class="relative w-[40px] text-center text-green-400">00</div>
+            <div id="am" class="text-sm flex items-center">AM</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const hourEl = document.getElementById('hour');
+            const minuteEl = document.getElementById('minute');
+            const secondEl = document.getElementById('second');
+            const amEl = document.getElementById('am');
+            const hrEl = document.getElementById('hr');
+            const minEl = document.getElementById('min');
+            const scEl = document.getElementById('sc');
+            const numsEl = document.getElementById('nums');
+
+            // Initialize clock numbers
+            if (numsEl) {
+                numsEl.innerHTML = Array.from({ length: 12 }, (_, i) =>
+                    `<span style="--i:${i + 1}"><b>${i + 1}</b></span>`
+                ).join('');
+            }
+
+            const setClock = () => {
+                const d = new Date();
+                const h = d.getHours();
+                const m = d.getMinutes();
+                const s = d.getSeconds();
+                const hh = h % 12 || 12; // Convert to 12-hour format
+                const hrRotation = (h % 12) * 30 + m / 2 + s / 120; // Smooth hour hand
+
+                if (hourEl) hourEl.textContent = hh.toString().padStart(2, '0');
+                if (minuteEl) minuteEl.textContent = m.toString().padStart(2, '0');
+                if (secondEl) secondEl.textContent = s.toString().padStart(2, '0');
+                if (amEl) amEl.textContent = h >= 12 ? 'PM' : 'AM';
+                if (hrEl) hrEl.style.transform = `rotate(${hrRotation}deg)`;
+                if (minEl) minEl.style.transform = `rotate(${m * 6}deg)`;
+                if (scEl) scEl.style.transform = `rotate(${s * 6}deg)`;
+            };
+
+            setClock();
+            setInterval(setClock, 1000);
+        });
+    </script>
+</body>
+</html>
